@@ -17,6 +17,8 @@ import type { Room, RoomBroadcastPayload } from "@/types/room";
 import CopyButton from "./CopyButton";
 import CountdownTimer from "./CountdownTimer";
 import Toast from "./Toast";
+import ContentRenderer from "./ContentRenderer";
+
 
 interface RoomEditorProps {
   room: Room;
@@ -108,6 +110,7 @@ export default function RoomEditor({ room }: RoomEditorProps) {
   const [expired, setExpired] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   // Pick a random placeholder once per room session
   const placeholder = useMemo(
@@ -120,10 +123,19 @@ export default function RoomEditor({ room }: RoomEditorProps) {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
 
-  // Auto-focus textarea on mount
+  // ── Check ownership (client-side localStorage) ────────────────────────────
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+    const storedToken = localStorage.getItem(`roomdrop_owner:${room.code}`);
+    const isOwnerCheck =
+      !!storedToken &&
+      !!room.owner_token &&
+      storedToken === room.owner_token;
+    setIsOwner(isOwnerCheck);
+    // Only focus if owner
+    if (isOwnerCheck) textareaRef.current?.focus();
+  }, [room.code, room.owner_token]);
+
+
 
   const handleCopyCode = useCallback(() => {
     if (copiedCode) return;
@@ -378,9 +390,9 @@ export default function RoomEditor({ room }: RoomEditorProps) {
           </div>
         </div>
 
-        {/* Right: Timer + save status */}
+        {/* Right: QR + Timer + save status */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <SaveIndicator status={saveStatus} />
+          {isOwner && <SaveIndicator status={saveStatus} />}
           <CountdownTimer
             expiresAt={room.expires_at}
             onExpired={handleExpired}
@@ -388,38 +400,43 @@ export default function RoomEditor({ room }: RoomEditorProps) {
         </div>
       </header>
 
-      {/* Textarea */}
+
+      {/* Content area: textarea for owner, rendered view for viewers */}
       <div className="animate-slide-up delay-100" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <textarea
-          ref={textareaRef}
-          id="room-textarea"
-          value={content}
-          onChange={handleChange}
-          placeholder={placeholder}
-          aria-label="Shared room content"
-          spellCheck
-          style={{
-            flex: 1,
-            width: "100%",
-            minHeight: "calc(100dvh - 160px)",
-            padding: "24px",
-            background: "var(--bg-primary)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            color: "var(--text-primary)",
-            caretColor: "var(--text-primary)",
-            transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-            boxShadow: "inset 0 2px 4px rgba(0,0,0,0.2)",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "var(--text-secondary)";
-            e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px var(--text-secondary)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "var(--border)";
-            e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2)";
-          }}
-        />
+        {isOwner ? (
+          <textarea
+            ref={textareaRef}
+            id="room-textarea"
+            value={content}
+            onChange={handleChange}
+            placeholder={placeholder}
+            aria-label="Shared room content"
+            spellCheck
+            style={{
+              flex: 1,
+              width: "100%",
+              minHeight: "calc(100dvh - 160px)",
+              padding: "24px",
+              background: "var(--bg-primary)",
+              border: "1px solid var(--border)",
+              borderRadius: 12,
+              color: "var(--text-primary)",
+              caretColor: "var(--text-primary)",
+              transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.2)",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "var(--text-secondary)";
+              e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px var(--text-secondary)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "var(--border)";
+              e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2)";
+            }}
+          />
+        ) : (
+          <ContentRenderer content={content} />
+        )}
       </div>
 
       {/* Footer */}
@@ -441,7 +458,8 @@ export default function RoomEditor({ room }: RoomEditorProps) {
             color: "var(--text-muted)",
           }}
         >
-          {content.length.toLocaleString()} chars · synced in real time
+          {content.length.toLocaleString()} chars
+          {isOwner ? " · synced in real time" : " · view only"}
         </p>
         <CopyButton
           id="copy-content-btn"

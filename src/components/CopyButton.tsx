@@ -67,7 +67,7 @@ export default function CopyButton({
   return (
     <button
       id={id}
-      className={className ?? "btn-secondary"}
+      className={`${className ?? "btn-secondary"} ${copied ? "animate-button-pop" : ""}`}
       onClick={handleCopy}
       aria-label={copied ? "Copied!" : label}
       title={copied ? "Copied!" : label}

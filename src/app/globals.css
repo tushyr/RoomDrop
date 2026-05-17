@@ -247,6 +247,15 @@ button, [role="button"] {
 .animate-toast-in  { animation: toastIn 0.25s ease-out forwards; }
 .animate-toast-out { animation: toastOut 0.25s ease-in forwards; }
 
+/* ── Button Pop Animation ─────────────────────────────────────────────────── */
+@keyframes buttonPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.92); }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.animate-button-pop { animation: buttonPop 0.3s ease-out forwards; }
+
 /* ── Shimmer (urgent timer) ───────────────────────────────────────────────── */
 @keyframes shimmer {
   0%, 100% { opacity: 1; }

@@ -21,6 +21,11 @@ export default function CreateRoomButton() {
         return;
       }
 
+      // Save owner token so this browser knows it owns the room
+      if (data.room.owner_token) {
+        localStorage.setItem(`roomdrop_owner:${data.room.code}`, data.room.owner_token);
+      }
+
       // Cache room data so RoomLoader can skip a second DB round-trip
       sessionStorage.setItem(`room:${data.room.code}`, JSON.stringify(data.room));
       router.push(`/room/${data.room.code}`);

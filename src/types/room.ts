@@ -4,6 +4,7 @@ export interface Room {
   content: string;
   created_at: string;
   expires_at: string;
+  owner_token: string | null;
 }
 
 export interface RoomBroadcastPayload {

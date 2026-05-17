@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { generateRoomCode, getRoomExpiryTimestamp } from "@/lib/utils";
+import { randomUUID } from "crypto";
 
 /**
  * POST /api/rooms
- * Creates a new room with a random 6-char code.
+ * Creates a new room with a random 6-char code and a unique owner_token.
  * Retries up to 3 times on code collision.
  */
 export async function POST() {
@@ -17,10 +18,11 @@ export async function POST() {
   while (attempts < maxAttempts) {
     const code = generateRoomCode();
     const expires_at = getRoomExpiryTimestamp();
+    const owner_token = randomUUID();
 
     const { data, error } = await supabase
       .from("rooms")
-      .insert({ code, content: "", expires_at })
+      .insert({ code, content: "", expires_at, owner_token })
       .select()
       .single();
 
