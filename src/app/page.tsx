@@ -1,5 +1,6 @@
 import CreateRoomButton from "@/components/CreateRoomButton";
 import JoinRoomForm from "@/components/JoinRoomForm";
+import InstallAppButton from "@/components/InstallAppButton";
 
 export default function HomePage() {
   return (
@@ -37,10 +38,13 @@ export default function HomePage() {
           </section>
         </div>
 
-        {/* Footer note */}
-        <p className="animate-slide-up delay-200 mt-8 text-center text-xs text-[var(--text-muted)]">
-          Free & Open. End-to-end ephemeral.
-        </p>
+        {/* Footer */}
+        <div className="animate-slide-up delay-200 mt-8 flex flex-col items-center gap-3">
+          <InstallAppButton />
+          <p className="text-center text-xs text-[var(--text-muted)]">
+            Free & Open. End-to-end ephemeral.
+          </p>
+        </div>
       </div>
     </main>
   );

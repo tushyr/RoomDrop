@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import TransitionOverlay from "@/components/TransitionOverlay";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body>
+        <ServiceWorkerRegistrar />
         <TransitionOverlay />
         {children}
       </body>
