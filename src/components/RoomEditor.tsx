@@ -130,24 +130,32 @@ export default function RoomEditor({ room }: RoomEditorProps) {
 
     const text = room.code;
 
+    const markCopied = () => {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    };
+
     // Primary: modern Clipboard API (works on HTTPS + desktop)
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(() => {
-        setCopiedCode(true);
-        setTimeout(() => setCopiedCode(false), 2000);
+        markCopied();
       }).catch(() => {
         // Fallback for mobile Safari / insecure contexts
-        copyViaExecCommand(text)
-          ? (setCopiedCode(true), setTimeout(() => setCopiedCode(false), 2000))
-          : setToast("Copy failed — long-press the code to copy manually.");
+        if (copyViaExecCommand(text)) {
+          markCopied();
+        } else {
+          setToast("Copy failed — long-press the code to copy manually.");
+        }
       });
       return;
     }
 
     // Fallback for browsers without Clipboard API
-    copyViaExecCommand(text)
-      ? (setCopiedCode(true), setTimeout(() => setCopiedCode(false), 2000))
-      : setToast("Copy failed — long-press the code to copy manually.");
+    if (copyViaExecCommand(text)) {
+      markCopied();
+    } else {
+      setToast("Copy failed — long-press the code to copy manually.");
+    }
   }, [room.code, copiedCode]);
 
   // ── Realtime subscription ──────────────────────────────────────────────────
