@@ -1,138 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── CSS Variables ─────────────────────────────────────────────────────────── */
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --bg-primary:   #000000;
-  --bg-secondary: #0A0A0A;
-  --bg-card:      rgba(255, 255, 255, 0.02);
-  --bg-card-hover:rgba(255, 255, 255, 0.04);
-  --border:       rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.2);
-  --text-primary: #EDEDED;
-  --text-secondary:#A1A1AA;
-  --text-muted:   #71717A;
-  --accent:       #FFFFFF;
-  --accent-fg:    #000000;
-  --danger:       #EF4444;
-  --success:      #10B981;
-  
-  --ring:         rgba(255, 255, 255, 0.3);
+  --bg-primary:    #0a0a0b;
+  --bg-card:       rgba(255, 255, 255, 0.032);
+  --bg-card-hover: rgba(255, 255, 255, 0.055);
+  --border:        rgba(255, 255, 255, 0.09);
+  --border-hover:  rgba(255, 255, 255, 0.18);
+  --border-active: rgba(255, 255, 255, 0.35);
+
+  --text-primary:   #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #52525b;
+
+  --accent:    #f4f4f5;
+  --accent-fg: #09090b;
+  --danger:    #f87171;
+  --success:   #34d399;
+
+  /* Needed by RoomLoader skeleton */
+  --bg-card-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.09);
+
+  /* Timing functions — tuned for 144Hz */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth:   cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Base ──────────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* ── Reset & Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: var(--bg-primary);
+  background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100dvh;
   margin: 0;
-  /* Very subtle noise texture could go here, but keeping it pure flat for ultra-clean look */
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── Single Ambient Glow — GPU only, 144Hz native ────────────────────────── */
+/* One extremely faint, very slow orb behind the homepage. Barely there. */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  width: 700px;
+  height: 700px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    rgba(139, 92, 246, 0.07) 0%,
+    rgba(59, 130, 246, 0.04) 40%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  animation: ambientDrift 30s ease-in-out infinite alternate;
+}
+
+@keyframes ambientDrift {
+  from { transform: translateX(-60%) scale(1);   }
+  to   { transform: translateX(-40%) scale(1.1); }
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-card-hover);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
-/* ── Typography & Selection ────────────────────────────────────────────────── */
+/* ── Selection ────────────────────────────────────────────────────────────── */
 ::selection {
-  background-color: var(--text-primary);
-  color: var(--bg-primary);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
+/* ── Typography ────────────────────────────────────────────────────────────── */
 textarea {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 1rem;
+  line-height: 1.7;
   resize: none;
-  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
-  font-size: 1rem; /* 16px — iOS Safari won't auto-zoom inputs >= 16px */
-  line-height: 1.6;
+}
+textarea:focus { outline: none; }
+
+* { -webkit-tap-highlight-color: transparent; }
+button, [role="button"] { min-height: 44px; }
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-left:  env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
-textarea:focus {
-  outline: none;
-}
-
-/* ── Animations ────────────────────────────────────────────────────────────── */
+/* ── Animations — 144Hz via GPU-only properties ────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
 @keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+.animate-fade-in  { animation: fadeIn 0.45s var(--ease-out-expo) both; }
+.animate-slide-up { animation: slideUpFade 0.7s var(--ease-out-expo) both; }
+
 @keyframes pulseSubtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 0.3; }
 }
+.animate-pulse-subtle { animation: pulseSubtle 1.8s var(--ease-smooth) infinite; }
 
-.animate-fade-in    { animation: fadeIn 0.5s ease-out forwards; }
-.animate-slide-up   { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-pulse-subtle { animation: pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.delay-100 { animation-delay: 70ms; }
+.delay-200 { animation-delay: 140ms; }
+.delay-300 { animation-delay: 210ms; }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-
-/* ── Mobile Polish ─────────────────────────────────────────────────────────── */
-
-/* Remove the grey flash on tap for all interactive elements */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Ensure buttons meet 44px minimum touch target (Apple HIG / WCAG) */
-button, [role="button"] {
-  min-height: 44px;
-}
-
-/* Safe-area insets for notched phones (iPhone X+) */
-@supports (padding: env(safe-area-inset-bottom)) {
-  body {
-    padding-left:   env(safe-area-inset-left);
-    padding-right:  env(safe-area-inset-right);
-  }
-}
-
-/* Tighter textarea padding on mobile to maximise writing space */
-@media (max-width: 640px) {
-  #room-textarea {
-    padding: 16px !important;
-  }
-}
-
-/* ── Component Utilities ───────────────────────────────────────────────────── */
+/* ── Glass Card ───────────────────────────────────────────────────────────── */
 .glass-card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: border-color 0.2s ease, background 0.2s ease;
-  box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  transition:
+    border-color 0.3s var(--ease-smooth),
+    background   0.3s var(--ease-smooth);
 }
 
 .glass-card:hover {
@@ -140,129 +158,124 @@ button, [role="button"] {
   background: var(--bg-card-hover);
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.9375rem;
-  letter-spacing: -0.01em;
-  background: var(--accent);
-  color: var(--accent-fg);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 8px -2px rgba(255, 255, 255, 0.15);
-}
-
-.btn-primary:hover {
-  background: #D4D4D8; /* Zinc 300 */
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px -2px rgba(255, 255, 255, 0.2);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  background: #A1A1AA; /* Zinc 400 */
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-primary,
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 600;
   font-size: 0.9375rem;
   letter-spacing: -0.01em;
-  background: var(--bg-secondary);
+  cursor: pointer;
+  will-change: transform;
+  transition:
+    transform    0.25s var(--ease-spring),
+    box-shadow   0.25s var(--ease-smooth),
+    background   0.2s  var(--ease-smooth),
+    border-color 0.2s  var(--ease-smooth),
+    opacity      0.2s  var(--ease-smooth);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+.btn-primary:hover {
+  transform: scale(1.03) translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.18);
+}
+.btn-primary:active { transform: scale(0.96); }
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all 0.15s ease;
 }
-
 .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
   border-color: var(--border-hover);
-  background: var(--bg-card-hover);
+  transform: scale(1.02);
 }
-
 .btn-secondary:active {
-  background: var(--bg-card);
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.02);
 }
 
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
 .input-base {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--bg-primary);
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 12px;
   color: var(--text-primary);
-  font-size: 1rem; /* 16px — prevents iOS auto-zoom on focus */
-  font-family: "JetBrains Mono", monospace;
-  transition: all 0.2s ease;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  transition:
+    border-color 0.25s var(--ease-smooth),
+    box-shadow   0.25s var(--ease-smooth),
+    background   0.25s var(--ease-smooth);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
 }
-
-.input-base::placeholder {
-  color: var(--text-muted);
-}
-
+.input-base::placeholder { color: var(--text-muted); }
 .input-base:focus {
-  outline: none;
-  border-color: var(--text-secondary);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px var(--text-secondary);
+  border-color: var(--border-active);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4), 0 0 0 3px rgba(255, 255, 255, 0.06);
 }
 
+/* ── Logo / Gradient Text ─────────────────────────────────────────────────── */
 .gradient-text {
-  /* Subtle silver/white shine rather than loud colors */
-  background: linear-gradient(to right, #FFFFFF, #A1A1AA);
+  background: linear-gradient(160deg, #ffffff 0%, #71717a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Toast Animations ─────────────────────────────────────────────────────── */
+/* ── Toast ────────────────────────────────────────────────────────────────── */
 @keyframes toastIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.94); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
 }
-
 @keyframes toastOut {
-  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
+  from { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
+  to   { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.94); }
 }
+.animate-toast-in  { animation: toastIn  0.4s var(--ease-out-expo) forwards; }
+.animate-toast-out { animation: toastOut 0.3s var(--ease-smooth)   forwards; }
 
-.animate-toast-in  { animation: toastIn 0.25s ease-out forwards; }
-.animate-toast-out { animation: toastOut 0.25s ease-in forwards; }
-
-/* ── Button Pop Animation ─────────────────────────────────────────────────── */
+/* ── Copy Pop ────────────────────────────────────────────────────────────── */
 @keyframes buttonPop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(0.92); }
-  60%  { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1);    }
+  35%  { transform: scale(0.92); }
+  70%  { transform: scale(1.06); }
+  100% { transform: scale(1);    }
 }
-.animate-button-pop { animation: buttonPop 0.3s ease-out forwards; }
+.animate-button-pop { animation: buttonPop 0.4s var(--ease-spring) forwards; }
 
-/* ── Shimmer (urgent timer) ───────────────────────────────────────────────── */
+/* ── Urgent Timer Pulse ───────────────────────────────────────────────────── */
 @keyframes shimmer {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.3; }
 }
 
-/* ── Spin (loaders) ───────────────────────────────────────────────────────── */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Mobile textarea padding ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  #room-textarea { padding: 16px !important; }
 }

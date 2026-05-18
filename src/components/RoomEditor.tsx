@@ -5,7 +5,6 @@ import {
   useEffect,
   useRef,
   useCallback,
-  useMemo,
 } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import TransitionLink from "./TransitionLink";
@@ -110,14 +109,14 @@ export default function RoomEditor({ room }: RoomEditorProps) {
   const [expired, setExpired] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
+  // null = not yet checked (avoids owner flash); true/false = determined
+  const [isOwner, setIsOwner] = useState<boolean | null>(null);
+  const [placeholder, setPlaceholder] = useState("");
 
-  // Pick a random placeholder once per room session
-  const placeholder = useMemo(
-    () => PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [room.code]
-  );
+  // Set random placeholder client-side to avoid SSR hydration mismatch
+  useEffect(() => {
+    setPlaceholder(PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)]);
+  }, [room.code]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -312,12 +311,14 @@ export default function RoomEditor({ room }: RoomEditorProps) {
     <main
       className="animate-fade-in"
       style={{
-        minHeight: "100dvh",
+        height: "100dvh",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         maxWidth: 800,
         margin: "0 auto",
-        padding: "20px 16px 16px",
+        padding: "16px 16px 12px",
+        boxSizing: "border-box",
       }}
     >
       {/* Header */}
@@ -401,9 +402,11 @@ export default function RoomEditor({ room }: RoomEditorProps) {
       </header>
 
 
-      {/* Content area: textarea for owner, rendered view for viewers */}
-      <div className="animate-slide-up delay-100" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {isOwner ? (
+      {/* Content area: textarea for owner, rendered view for viewers.
+          isOwner===null means localStorage check is in flight — render nothing
+          to avoid a flash of the wrong UI. */}
+      <div className="animate-slide-up delay-100" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        {isOwner === null ? null : isOwner ? (
           <textarea
             ref={textareaRef}
             id="room-textarea"
@@ -415,23 +418,28 @@ export default function RoomEditor({ room }: RoomEditorProps) {
             style={{
               flex: 1,
               width: "100%",
-              minHeight: "calc(100dvh - 160px)",
+              /* Fill remaining vertical space without overflowing viewport */
+              height: "100%",
+              minHeight: 0,
               padding: "24px",
-              background: "var(--bg-primary)",
-              border: "1px solid var(--border)",
-              borderRadius: 12,
+              background: "rgba(255, 255, 255, 0.03)",
+              border: "1px solid rgba(255, 255, 255, 0.09)",
+              borderRadius: 16,
               color: "var(--text-primary)",
               caretColor: "var(--text-primary)",
-              transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.2)",
+              resize: "none",
+              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = "var(--text-secondary)";
-              e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px var(--text-secondary)";
+              e.target.style.borderColor = "rgba(255, 255, 255, 0.35)";
+              e.target.style.background = "rgba(255, 255, 255, 0.05)";
+              e.target.style.boxShadow = "inset 0 1px 2px rgba(0,0,0,0.4), 0 0 0 3px rgba(255,255,255,0.06)";
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = "var(--border)";
-              e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.2)";
+              e.target.style.borderColor = "rgba(255, 255, 255, 0.09)";
+              e.target.style.background = "rgba(255, 255, 255, 0.03)";
+              e.target.style.boxShadow = "inset 0 1px 2px rgba(0,0,0,0.4)";
             }}
           />
         ) : (
