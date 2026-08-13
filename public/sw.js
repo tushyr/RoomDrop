@@ -1,5 +1,5 @@
-// RoomDrop Service Worker v2 — PWA install + shell caching + stale-while-revalidate
-const CACHE_NAME = "roomdrop-v2";
+// RoomDrop Service Worker v3 — Automatic instant updates & cache bust
+const CACHE_NAME = "roomdrop-v3";
 const STATIC_SHELL = [
   "/",
   "/favicon.ico",
@@ -7,42 +7,45 @@ const STATIC_SHELL = [
   "/site.webmanifest",
 ];
 
-// ── Install: precache shell assets ─────────────────────────────────────────
+// ── Install: precache and force activate immediately ────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
       cache.addAll(STATIC_SHELL).catch(() => {
-        // Silently fail if any shell asset is unavailable
+        // Silently continue if an asset fails
       })
     )
   );
-  // Activate immediately — don't wait for old tabs
+  // Force new SW to become active immediately (replaces old v1/v2 SW)
   self.skipWaiting();
 });
 
-// ── Activate: delete stale caches from previous SW versions ───────────────
+// ── Activate: purge all old caches and take control of all open clients ─────
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+          .map((key) => {
+            console.log("[RoomDrop] Deleting old cache:", key);
+            return caches.delete(key);
+          })
       )
     )
   );
-  // Take control of all open clients immediately
+  // Take control of all open windows/PWAs immediately
   self.clients.claim();
 });
 
-// ── Fetch: smart routing strategy ─────────────────────────────────────────
+// ── Fetch strategy ─────────────────────────────────────────────────────────
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Skip non-GET requests entirely
+  // Skip non-GET requests
   if (event.request.method !== "GET") return;
 
-  // Skip API routes and Supabase realtime — always network
+  // Always bypass cache for API routes, Supabase, and realtime
   if (
     url.pathname.startsWith("/api/") ||
     url.hostname.includes("supabase") ||
@@ -51,10 +54,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Skip Next.js HMR and dev runtime
+  // Skip dev HMR
   if (url.pathname.startsWith("/_next/webpack-hmr")) return;
 
-  // Next.js immutable static chunks: cache-first (they have content hashes)
+  // Next.js hashed immutable chunks: cache-first with network fallback
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.match(event.request).then(
@@ -74,15 +77,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigation requests (HTML pages): network-first, cache fallback
+  // Navigation requests (HTML pages): Network-first to always fetch the latest UI, with cache fallback
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) =>
-            cache.put(event.request, clone)
-          );
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) =>
+              cache.put(event.request, clone)
+            );
+          }
           return res;
         })
         .catch(() =>
@@ -92,7 +97,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // All other static assets (fonts, icons, images): stale-while-revalidate
+  // Other static assets (icons, manifest, fonts): stale-while-revalidate
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>
       cache.match(event.request).then((cached) => {
@@ -104,4 +109,11 @@ self.addEventListener("fetch", (event) => {
       })
     )
   );
+});
+
+// Allow clients to trigger skipWaiting via postMessage
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
