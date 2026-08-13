@@ -5,14 +5,6 @@ import { usePathname } from "next/navigation";
 
 /**
  * Full-screen veil overlay that enables smooth page transitions.
- *
- * Pattern:
- *   1. On navigation intent → veil fades IN  (covers current page)
- *   2. router.push() fires underneath the veil (user sees nothing)
- *   3. pathname changes → veil fades OUT (reveals new page)
- *
- * Only animates `opacity` on a fixed element — pure compositor thread,
- * zero layout impact, zero stutter.
  */
 export default function TransitionOverlay() {
   const veilRef = useRef<HTMLDivElement>(null);
@@ -53,11 +45,10 @@ export default function TransitionOverlay() {
       style={{
         position: "fixed",
         inset: 0,
-        background: "#000000",
+        background: "var(--bg-primary)",
         zIndex: 9999,
         opacity: 0,
         pointerEvents: "none",
-        // Only opacity — never layout, never filter, never transform
         transition: "opacity 0.22s ease",
         willChange: "opacity",
       }}

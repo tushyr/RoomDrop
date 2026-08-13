@@ -16,12 +16,11 @@ function copyViaExecCommand(text: string): boolean {
     const el = document.createElement("textarea");
     el.value = text;
     el.setAttribute("readonly", "");
-    // Off-screen so it doesn't cause a scroll jump or flash
     el.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0;";
     document.body.appendChild(el);
     el.focus();
     el.select();
-    el.setSelectionRange(0, text.length); // Required on iOS for selection to register
+    el.setSelectionRange(0, text.length);
     const ok = document.execCommand("copy");
     document.body.removeChild(el);
     return ok;
@@ -42,22 +41,22 @@ export default function CopyButton({
   const handleCopy = useCallback(() => {
     if (copied) return;
 
-    // Primary path: async Clipboard API (works on HTTPS / desktop)
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }).catch(() => {
-        // Fallback: synchronous execCommand (mobile Safari, HTTP contexts)
-        if (copyViaExecCommand(text)) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
-        }
-      });
+        })
+        .catch(() => {
+          if (copyViaExecCommand(text)) {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }
+        });
       return;
     }
 
-    // Fallback for browsers without Clipboard API at all
     if (copyViaExecCommand(text)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -67,20 +66,21 @@ export default function CopyButton({
   return (
     <button
       id={id}
-      className={`${className ?? "btn-secondary"} ${copied ? "animate-button-pop" : ""}`}
+      type="button"
+      className={`${className ?? "btn-cozy-subtle"} ${copied ? "animate-button-pop" : ""}`}
       onClick={handleCopy}
       aria-label={copied ? "Copied!" : label}
       title={copied ? "Copied!" : label}
       style={{
-        minWidth: 88,
-        padding: "8px 14px",
-        fontSize: "0.8125rem",
-        fontWeight: 500,
+        minWidth: 92,
+        padding: "7px 14px",
+        fontSize: "0.875rem",
+        fontWeight: 600,
         gap: 6,
-        transition: "all 0.2s ease",
         ...(copied && {
-          borderColor: "rgba(34,197,94,0.4)",
-          color: "#22c55e",
+          borderColor: "var(--accent-green)",
+          backgroundColor: "rgba(122, 170, 120, 0.15)",
+          color: "var(--text-primary)",
         }),
         ...style,
       }}
@@ -88,12 +88,12 @@ export default function CopyButton({
       {copied ? (
         <>
           <CheckIcon />
-          Copied!
+          <span>Copied!</span>
         </>
       ) : (
         <>
           <CopyIcon />
-          {label}
+          <span>{label}</span>
         </>
       )}
     </button>
@@ -125,7 +125,7 @@ function CheckIcon() {
       height="14"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
+      stroke="var(--accent-green)"
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"

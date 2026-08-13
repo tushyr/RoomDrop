@@ -37,24 +37,23 @@ export default function Toast({ message, duration = 2500, onDismiss }: ToastProp
         display: "inline-flex",
         alignItems: "center",
         gap: 8,
-        padding: "10px 18px",
+        padding: "10px 20px",
         borderRadius: 999,
-        background: "rgba(30,30,35,0.95)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        backdropFilter: "blur(16px)",
+        background: "#FFFDF9",
+        border: "1.5px solid var(--border-card)",
         color: "var(--text-primary)",
-        fontSize: "0.875rem",
-        fontWeight: 500,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-        // Wrap on narrow screens instead of overflowing
+        fontFamily: "var(--font-body)",
+        fontSize: "0.9375rem",
+        fontWeight: 600,
+        boxShadow: "0 8px 24px -4px rgba(74, 99, 72, 0.15)",
         whiteSpace: "normal",
         maxWidth: "calc(100vw - 48px)",
         textAlign: "center",
         wordBreak: "break-word",
       }}
     >
-      <span style={{ color: "#22c55e" }}>✓</span>
-      {message}
+      <span style={{ color: "#589B66", fontWeight: 800 }}>✓</span>
+      <span>{message}</span>
     </div>
   );
 }

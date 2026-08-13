@@ -25,12 +25,10 @@ export default function CountdownTimer({ expiresAt, onExpired }: CountdownTimerP
       if (ms <= 0) {
         clearInterval(interval);
         onExpiredRef.current?.();
-        // Redirect to show expired state
         router.refresh();
       }
     };
 
-    // Tick immediately, then every second
     tick();
     const interval = setInterval(tick, 1000);
 
@@ -45,24 +43,15 @@ export default function CountdownTimer({ expiresAt, onExpired }: CountdownTimerP
       role="timer"
       suppressHydrationWarning
       aria-label={`Room expires in ${display}`}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-mono font-bold tracking-tight transition-all"
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "5px 12px",
-        borderRadius: 999,
-        background: isUrgent
-          ? "rgba(239,68,68,0.12)"
-          : "rgba(255,255,255,0.06)",
-        border: `1px solid ${isUrgent ? "rgba(239,68,68,0.3)" : "var(--border)"}`,
-        fontSize: "0.8125rem",
-        fontFamily: "JetBrains Mono, monospace",
-        color: isUrgent ? "#ef4444" : "var(--text-secondary)",
-        transition: "all 0.3s ease",
+        background: isUrgent ? "rgba(240, 113, 113, 0.15)" : "var(--bg-card)",
+        border: `1.5px solid ${isUrgent ? "rgba(240, 113, 113, 0.4)" : "var(--border-card)"}`,
+        color: isUrgent ? "var(--danger)" : "var(--text-primary)",
       }}
     >
       <ClockIcon urgent={isUrgent} />
-      {display}
+      <span>{display}</span>
     </div>
   );
 }
@@ -70,15 +59,14 @@ export default function CountdownTimer({ expiresAt, onExpired }: CountdownTimerP
 function ClockIcon({ urgent }: { urgent: boolean }) {
   return (
     <svg
-      width="12"
-      height="12"
+      width="13"
+      height="13"
       viewBox="0 0 24 24"
       fill="none"
-      stroke={urgent ? "#ef4444" : "currentColor"}
-      strokeWidth="2"
+      stroke={urgent ? "var(--danger)" : "currentColor"}
+      strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={urgent ? { animation: "shimmer 1s ease-in-out infinite" } : {}}
     >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />

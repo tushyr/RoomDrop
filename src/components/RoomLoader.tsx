@@ -17,12 +17,12 @@ export default function RoomLoader({ code }: RoomLoaderProps) {
   const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
-    // ── Fast path: room was just created, data is in sessionStorage ────────
+    // Fast path: room was just created, data is in sessionStorage
     const cacheKey = `room:${code}`;
     const cached = sessionStorage.getItem(cacheKey);
 
     if (cached) {
-      sessionStorage.removeItem(cacheKey); // consume once
+      sessionStorage.removeItem(cacheKey);
       try {
         const parsed = JSON.parse(cached) as Room;
         if (isRoomExpired(parsed.expires_at)) {
@@ -33,16 +33,16 @@ export default function RoomLoader({ code }: RoomLoaderProps) {
         }
         return;
       } catch {
-        // corrupt cache — fall through to API fetch
+        // Fall through to API fetch
       }
     }
 
-    // ── Slow path: direct URL visit or join-by-code ─────────────────────────
+    // Slow path: direct URL visit or join-by-code
     fetch(`/api/rooms/${code}`)
       .then(async (res) => {
         if (res.status === 404) { setStatus("not-found"); return; }
-        if (res.status === 410) { setStatus("expired");   return; }
-        if (!res.ok)            { setStatus("not-found"); return; }
+        if (res.status === 410) { setStatus("expired"); return; }
+        if (!res.ok) { setStatus("not-found"); return; }
         const data = await res.json();
         setRoom(data.room as Room);
         setStatus("ready");
@@ -50,10 +50,10 @@ export default function RoomLoader({ code }: RoomLoaderProps) {
       .catch(() => setStatus("not-found"));
   }, [code]);
 
-  if (status === "loading")   return <LoadingScreen />;
+  if (status === "loading") return <LoadingScreen />;
   if (status === "not-found") return <NotFoundScreen />;
-  if (status === "expired")   return <ExpiredScreen code={code} />;
-  if (room)                   return <RoomEditor room={room} />;
+  if (status === "expired") return <ExpiredScreen code={code} />;
+  if (room) return <RoomEditor room={room} />;
   return null;
 }
 
@@ -61,71 +61,19 @@ export default function RoomLoader({ code }: RoomLoaderProps) {
 function LoadingScreen() {
   return (
     <main
-      className="animate-fade-in"
-      style={{
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        maxWidth: 800,
-        margin: "0 auto",
-        padding: "20px 16px 16px",
-      }}
+      className="animate-fade-in flex flex-col h-dvh max-h-dvh w-full max-w-4xl mx-auto px-4 py-3 sm:px-6 sm:py-4 select-none box-border"
     >
       {/* Header skeleton */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 20,
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            className="animate-pulse-subtle"
-            style={{
-              width: 96,
-              height: 22,
-              borderRadius: 6,
-              background: "var(--bg-card-hover)",
-            }}
-          />
-          <div
-            className="animate-pulse-subtle"
-            style={{
-              width: 80,
-              height: 32,
-              borderRadius: 8,
-              background: "var(--bg-card-hover)",
-              animationDelay: "100ms",
-            }}
-          />
+      <div className="flex items-center justify-between gap-3 mb-3 w-full flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="animate-pulse w-24 h-7 rounded-lg bg-[var(--border-card)]" />
+          <div className="animate-pulse w-20 h-7 rounded-xl bg-[var(--border-card)]" />
         </div>
-        <div
-          className="animate-pulse-subtle"
-          style={{
-            width: 72,
-            height: 28,
-            borderRadius: 999,
-            background: "var(--bg-card-hover)",
-            animationDelay: "200ms",
-          }}
-        />
+        <div className="animate-pulse w-16 h-7 rounded-full bg-[var(--border-card)]" />
       </div>
 
       {/* Textarea skeleton */}
-      <div
-        className="animate-pulse-subtle"
-        style={{
-          flex: 1,
-          minHeight: "calc(100dvh - 160px)",
-          borderRadius: 12,
-          border: "1px solid var(--border)",
-          background: "var(--bg-primary)",
-          animationDelay: "150ms",
-        }}
-      />
+      <div className="animate-pulse flex-1 w-full rounded-2xl border border-[var(--border-card)] bg-[var(--bg-card)]" />
     </main>
   );
 }
@@ -133,34 +81,30 @@ function LoadingScreen() {
 // ── Not found screen ───────────────────────────────────────────────────────
 function NotFoundScreen() {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4 bg-[var(--bg-primary)]">
-      <div
-        className="glass-card animate-slide-up text-center"
-        style={{ padding: "48px 40px", maxWidth: 420 }}
-      >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🚫</div>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            marginBottom: 8,
-            letterSpacing: "-0.03em",
-          }}
-        >
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 bg-[var(--bg-primary)] select-none">
+      <div className="cozy-card animate-slide-up text-center p-8 max-w-sm w-full relative">
+        <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl bg-[var(--border-card)] text-[var(--accent-yellow)]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
+
+        <h1 className="font-hand text-3xl font-bold text-[var(--text-primary)] mb-1.5">
           Room not found
         </h1>
-        <p
-          style={{
-            color: "var(--text-secondary)",
-            marginBottom: 32,
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="text-xs text-[var(--text-secondary)] font-ui leading-relaxed mb-6">
           That room doesn&apos;t exist or the code is incorrect. Double-check and try again.
         </p>
-        <TransitionLink href="/" className="btn-primary" style={{ textDecoration: "none" }}>
+        <TransitionLink
+          href="/"
+          className="btn-butter no-underline w-full justify-center"
+        >
           Back to home
         </TransitionLink>
+
+        <div className="dog-ear-corner" aria-hidden="true" />
       </div>
     </main>
   );
@@ -169,65 +113,32 @@ function NotFoundScreen() {
 // ── Expired screen ─────────────────────────────────────────────────────────
 function ExpiredScreen({ code }: { code: string }) {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4 bg-[var(--bg-primary)]">
-      {/* Subtle red glow */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          style={{
-            position: "absolute",
-            top: "30%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "400px",
-            height: "400px",
-            background: "radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 70%)",
-            borderRadius: "50%",
-          }}
-        />
-      </div>
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 bg-[var(--bg-primary)] select-none">
+      <div className="cozy-card animate-slide-up text-center p-8 max-w-sm w-full relative">
+        <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl bg-[var(--border-card)] text-[var(--accent-rose)]">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
 
-      <div
-        className="glass-card animate-slide-up text-center"
-        style={{ padding: "48px 40px", maxWidth: 420 }}
-      >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>⏱</div>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            marginBottom: 8,
-            letterSpacing: "-0.03em",
-          }}
-        >
-          This room has expired
+        <h1 className="font-hand text-3xl font-bold text-[var(--text-primary)] mb-1.5">
+          Room expired
         </h1>
-        <p style={{ color: "var(--text-secondary)", marginBottom: 8, lineHeight: 1.6 }}>
-          Room{" "}
-          <code
-            style={{
-              fontFamily: "JetBrains Mono, monospace",
-              color: "var(--text-primary)",
-              background: "rgba(255,255,255,0.06)",
-              padding: "2px 8px",
-              borderRadius: 6,
-            }}
-          >
-            {code}
-          </code>{" "}
-          is no longer available.
+        <p className="text-xs text-[var(--text-secondary)] font-ui mb-1">
+          Room <code className="font-mono font-bold bg-[var(--border-card)] px-2 py-0.5 rounded text-[var(--code-badge-text)]">{code}</code> has vanished.
         </p>
-        <p
-          style={{
-            color: "var(--text-muted)",
-            fontSize: "0.875rem",
-            marginBottom: 32,
-          }}
+        <p className="text-[11px] text-[var(--text-muted)] font-ui mb-6">
+          Rooms automatically delete after 1 hour.
+        </p>
+        <TransitionLink
+          href="/"
+          className="btn-matcha no-underline w-full justify-center"
         >
-          Rooms automatically expire after 1 hour.
-        </p>
-        <TransitionLink href="/" className="btn-primary" style={{ textDecoration: "none" }}>
           Create a new room
         </TransitionLink>
+
+        <div className="dog-ear-corner" aria-hidden="true" />
       </div>
     </main>
   );

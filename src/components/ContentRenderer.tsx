@@ -5,20 +5,6 @@ interface ContentRendererProps {
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
-const baseStyle: React.CSSProperties = {
-  flex: 1,
-  width: "100%",
-  minHeight: "calc(100dvh - 200px)",
-  padding: "24px",
-  background: "rgba(255, 255, 255, 0.03)",
-  border: "1px solid rgba(255, 255, 255, 0.09)",
-  borderRadius: 16,
-  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
-  fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-  fontSize: "0.9375rem",
-  lineHeight: 1.6,
-};
-
 /**
  * Renders plain text content with URLs automatically converted to clickable links.
  * Used for the read-only viewer mode in RoomEditor.
@@ -27,12 +13,8 @@ export default function ContentRenderer({ content, style }: ContentRendererProps
   if (!content) {
     return (
       <div
-        style={{
-          ...baseStyle,
-          color: "var(--text-muted)",
-          fontStyle: "italic",
-          ...style,
-        }}
+        className="cozy-card flex-1 w-full p-4 sm:p-6 text-sm sm:text-base font-ui text-[var(--text-muted)] italic flex items-center justify-center"
+        style={style}
       >
         Nothing here yet…
       </div>
@@ -43,34 +25,27 @@ export default function ContentRenderer({ content, style }: ContentRendererProps
 
   return (
     <>
-      {/* Inline style for link hover — avoids inline event handlers and casting bugs */}
       <style>{`
         .cr-link {
-          color: var(--text-primary);
+          color: var(--code-badge-text);
+          font-weight: 600;
           text-decoration: underline;
           text-underline-offset: 3px;
-          text-decoration-color: rgba(255,255,255,0.3);
-          transition: text-decoration-color 0.15s ease;
+          text-decoration-color: rgba(74, 222, 128, 0.4);
+          transition: text-decoration-color 0.15s ease, color 0.15s ease;
           cursor: pointer;
         }
         .cr-link:hover {
-          text-decoration-color: rgba(255,255,255,0.8);
+          color: #86EFAC;
+          text-decoration-color: #86EFAC;
         }
       `}</style>
       <div
-        style={{
-          ...baseStyle,
-          color: "var(--text-secondary)",
-          overflowY: "auto",
-          wordBreak: "break-word",
-          whiteSpace: "pre-wrap",
-          userSelect: "text",
-          ...style,
-        }}
+        className="cozy-card flex-1 w-full p-4 sm:p-6 text-sm sm:text-base font-ui text-[var(--text-primary)] overflow-y-auto break-words whitespace-pre-wrap select-text leading-relaxed"
+        style={style}
       >
         {lines.map((line, lineIdx) => {
           const parts = line.split(URL_REGEX);
-          // Reset after split
           URL_REGEX.lastIndex = 0;
           return (
             <span key={lineIdx}>

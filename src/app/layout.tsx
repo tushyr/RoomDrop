@@ -4,13 +4,13 @@ import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RoomDrop",
+  title: "RoomDrop — Instant Ephemeral Text Sharing",
   description:
-    "Create a private temporary room and share text in real time. No accounts. No clutter. Rooms expire after 1 hour.",
-  keywords: ["realtime", "text share", "collaboration", "temporary room"],
+    "Paste your text, get a shareable code. No sign-ups. Rooms vanish in one hour.",
+  keywords: ["realtime", "text share", "collaboration", "temporary room", "roomdrop"],
   openGraph: {
     title: "RoomDrop",
-    description: "Instant real-time text sharing. No accounts. Rooms expire in 1 hour.",
+    description: "Paste your text, get a shareable code. No sign-ups. Rooms vanish in 1 hour.",
     type: "website",
   },
   icons: {
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0a0b",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -40,9 +40,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head />
-      <body>
+    <html lang="en">
+      <body className="bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased min-h-dvh">
         <ServiceWorkerRegistrar />
         <TransitionOverlay />
         {children}
