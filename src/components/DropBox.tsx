@@ -80,9 +80,9 @@ export default function DropBox() {
           aria-label="Content to share"
           spellCheck
           rows={3}
-          className="cozy-textarea text-sm sm:text-base p-4 sm:p-5"
+          className="cozy-textarea text-base p-4 sm:p-5"
           maxLength={10000}
-          style={{ minHeight: "92px", maxHeight: "140px" }}
+          style={{ minHeight: "92px", maxHeight: "140px", fontSize: "16px" }}
         />
 
         {/* Bottom bar inside card: Character counter & Pencil icon */}

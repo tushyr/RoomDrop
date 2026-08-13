@@ -334,8 +334,9 @@ export default function RoomEditor({ room }: RoomEditorProps) {
                 placeholder={placeholder}
                 aria-label="Shared room content"
                 spellCheck
-                className="cozy-textarea flex-1 w-full h-full p-4 sm:p-6 text-sm sm:text-base font-ui"
+                className="cozy-textarea flex-1 w-full h-full p-4 sm:p-6 text-base font-ui"
                 maxLength={50000}
+                style={{ fontSize: "16px" }}
               />
               <div className="dog-ear-corner" aria-hidden="true" />
             </div>

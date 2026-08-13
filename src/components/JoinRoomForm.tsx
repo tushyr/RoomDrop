@@ -105,7 +105,7 @@ export default function JoinRoomForm() {
           <input
             ref={inputRef}
             id="room-code-input"
-            className="cozy-input text-sm sm:text-base py-2.5 sm:py-3 pl-10 pr-3 font-ui"
+            className="cozy-input text-base py-2.5 sm:py-3 pl-10 pr-3 font-ui"
             type="text"
             value={code}
             onChange={handleChange}
@@ -118,7 +118,7 @@ export default function JoinRoomForm() {
             spellCheck={false}
             aria-label="Room code"
             aria-describedby={error ? "join-error" : undefined}
-            style={{ letterSpacing: code ? "0.2em" : "normal" }}
+            style={{ letterSpacing: code ? "0.2em" : "normal", fontSize: "16px" }}
           />
         </div>
 
